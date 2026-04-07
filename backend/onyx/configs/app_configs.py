@@ -1032,6 +1032,12 @@ AUTO_LLM_CONFIG_URL = os.environ.get(
     "https://raw.githubusercontent.com/onyx-dot-app/onyx/main/backend/onyx/llm/well_known_providers/recommended-models.json",
 )
 
+# Optional override for Unstructured partition API endpoint (self-hosted/local usage).
+# Example: http://unstructured-api:8000
+UNSTRUCTURED_API_URL = os.environ.get("UNSTRUCTURED_API_URL") or None
+if UNSTRUCTURED_API_URL:
+    UNSTRUCTURED_API_URL = UNSTRUCTURED_API_URL.rstrip("/")
+
 # How often to check for auto LLM model updates (in seconds)
 AUTO_LLM_UPDATE_INTERVAL_SECONDS = int(
     os.environ.get("AUTO_LLM_UPDATE_INTERVAL_SECONDS", 1800)  # 30 minutes
