@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&display=swap");
+
 @import "css/attachment-button.css";
 @import "css/button.css";
 @import "css/content-editable.css";
@@ -178,7 +180,8 @@
 
 /* Font Family Variables */
 :root {
-  --font-hanken-grotesk: "Hanken Grotesk", -apple-system, BlinkMacSystemFont,
+  --font-hanken-grotesk: var(--font-ibm-plex-sans-arabic),
+    -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, sans-serif;
   --font-dm-mono: "DM Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
     Consolas, "Courier New", monospace;
@@ -483,4 +486,11 @@ textarea {
 
 .container {
   margin-bottom: 1rem;
+}
+
+
+.rounded-side{
+  border-radius: var(--border-radius-08);
+  margin: 0.5rem;
+  max-height: calc(100% - 1rem);
 }

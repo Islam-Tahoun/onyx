@@ -51,7 +51,7 @@ vespa:
             storage: 30Gi
         storageClassName: ""
   enabled: true
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: vespa
     tag: "8.609.39"
@@ -90,7 +90,7 @@ opensearch:
   nodeGroup: "master"
   masterService: "onyx-opensearch-master"
 
-  replicas: 1
+  replicas: 2
 
   image:
     repository: "opensearchproject/opensearch"
@@ -160,10 +160,10 @@ inferenceCapability:
       value: inference-model-server
   resources:
     requests:
-      cpu: 2000m
-      memory: 3Gi
+      cpu: 5000m
+      memory: 5Gi
     limits:
-      cpu: 4000m
+      cpu: 9000m
       memory: 10Gi
   # Optional health probes
   # Example:
@@ -199,7 +199,7 @@ indexCapability:
     type: ClusterIP
     servicePort: 9000
     targetPort: 9000
-  replicaCount: 1
+  replicaCount: 2
   name: indexing-model-server
   deploymentLabels:
     app: indexing-model-server
@@ -213,14 +213,14 @@ indexCapability:
     repository: onyxdotapp/onyx-model-server
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-  limitConcurrency: 10
+  limitConcurrency: 80
   resources:
     requests:
-      cpu: 4000m
-      memory: 3Gi
-    limits:
-      cpu: 6000m
+      cpu: 8000m
       memory: 6Gi
+    limits:
+      cpu: 12000m
+      memory: 12Gi
   # Optional health probes
   # Example:
   # readinessProbe:
@@ -368,11 +368,11 @@ webserver:
 
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 3000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 6000m
+      memory: 4Gi
 
   # Optional health probes
   # Example:
@@ -458,11 +458,11 @@ api:
 
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 2000m
+      memory: 4Gi
     limits:
-      cpu: 1000m
-      memory: 3Gi
+      cpu: 8000m
+      memory: 9Gi
 
   # Optional health probes
   # Example:
@@ -570,11 +570,11 @@ celery_beat:
     app: celery-beat
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 4000m
+      memory: 4Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -605,11 +605,11 @@ celery_worker_heavy:
     app: celery-worker-heavy
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 4Gi
     limits:
-      cpu: 1000m
-      memory: 2Gi
+      cpu: 8000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -617,8 +617,7 @@ celery_worker_heavy:
   affinity: {}
 
 celery_worker_docprocessing:
-  extraEnv: []
-  replicaCount: 1
+  replicaCount: 4
   logLevel: INFO
   autoscaling:
     enabled: false
@@ -640,11 +639,11 @@ celery_worker_docprocessing:
     app: celery-worker-docprocessing
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 4Gi
     limits:
-      cpu: 1000m
-      memory: 12Gi
+      cpu: 6000m
+      memory: 18Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -675,11 +674,11 @@ celery_worker_light:
     app: celery-worker-light
   resources:
     requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
       cpu: 2000m
-      memory: 4Gi
+      memory: 2Gi
+    limits:
+      cpu: 8000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -710,11 +709,11 @@ celery_worker_monitoring:
     app: celery-worker-monitoring
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: 6000m
+      memory: 6Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -745,11 +744,11 @@ celery_worker_primary:
     app: celery-worker-primary
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 6Gi
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: 6000m
+      memory: 12Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -780,11 +779,11 @@ celery_worker_user_file_processing:
     app: celery-worker-user-file-processing
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
-    limits:
       cpu: 2000m
       memory: 2Gi
+    limits:
+      cpu: 6000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -906,8 +905,7 @@ mcpServer:
   affinity: {}
 
 celery_worker_docfetching:
-  extraEnv: []
-  replicaCount: 1
+  replicaCount: 4
   logLevel: INFO
   autoscaling:
     enabled: false
@@ -929,11 +927,11 @@ celery_worker_docfetching:
     app: celery-worker-docfetching
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 6Gi
     limits:
-      cpu: 1000m
-      memory: 16Gi
+      cpu: 4000m
+      memory: 20Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -955,11 +953,11 @@ redis:
     serviceType: ClusterIP
     resources:
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 4000m
+        memory: 1Gi
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 8000m
+        memory: 4Gi
     # Use existing secret for Redis password
     redisSecret:
       secretName: onyx-redis
@@ -970,7 +968,7 @@ redis:
     data: |
       appendonly no
       save ""
-      maxmemory 400mb
+      maxmemory 2gb
       maxmemory-policy allkeys-lru
       timeout 0
       tcp-keepalive 300
@@ -1008,7 +1006,7 @@ minio:
 codeInterpreter:
   enabled: true
 
-  replicaCount: 1
+  replicaCount: 3
 
   image:
     repository: onyxdotapp/code-interpreter
@@ -1023,10 +1021,10 @@ codeInterpreter:
 
   # Execution limits
   codeInterpreter:
-    maxExecTimeoutMs: 60000
-    maxOutputBytes: "1000000"
-    cpuTimeLimitSec: 5
-    memoryLimitMb: 256
+    maxExecTimeoutMs: 660000
+    maxOutputBytes: "9000000"
+    cpuTimeLimitSec: 15
+    memoryLimitMb: 1024
     host: "0.0.0.0"
     port: 8000
 
@@ -1046,11 +1044,11 @@ codeInterpreter:
   # API container resources
   resources:
     requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
       cpu: 1000m
-      memory: 512Mi
+      memory: 1Gi
+    limits:
+      cpu: 9000m
+      memory: 4Gi
 
   # RBAC for pod management (required for kubernetes executor)
   rbac:
@@ -1058,7 +1056,7 @@ codeInterpreter:
 
   # Security context
   podSecurityContext:
-    runAsNonRoot: true
+    runAsNonRoot: false
     runAsUser: 1000
     fsGroup: 1000
 
@@ -1067,9 +1065,9 @@ codeInterpreter:
       drop:
         - ALL
     readOnlyRootFilesystem: false
-    runAsNonRoot: true
+    runAsNonRoot: false
     runAsUser: 1000
-    allowPrivilegeEscalation: false
+    allowPrivilegeEscalation: true
 
   # Health probes
   livenessProbe:
@@ -1277,7 +1275,7 @@ configMap:
   S3_FILE_STORE_BUCKET_NAME: ""
   # Gen AI Settings
   GEN_AI_MAX_TOKENS: ""
-  LLM_SOCKET_READ_TIMEOUT: "60"
+  LLM_SOCKET_READ_TIMEOUT: "180"
   MAX_CHUNKS_FED_TO_CHAT: ""
   # Query Options
   DOC_TIME_DECAY: ""
@@ -1294,7 +1292,7 @@ configMap:
   MIN_THREADS_ML_MODELS: ""
   # Indexing Configs
   VESPA_SEARCHER_THREADS: ""
-  NUM_INDEXING_WORKERS: ""
+  NUM_INDEXING_WORKERS: "6"
   DISABLE_INDEX_UPDATE_ON_SWAP: ""
   DASK_JOB_CLIENT_ENABLED: ""
   CONTINUE_ON_CONNECTOR_FAILURE: ""
@@ -1305,10 +1303,10 @@ configMap:
   GONG_CONNECTOR_START_TIME: ""
   NOTION_CONNECTOR_ENABLE_RECURSIVE_PAGE_LOOKUP: ""
   # Worker Parallelism
-  CELERY_WORKER_DOCPROCESSING_CONCURRENCY: ""
-  CELERY_WORKER_LIGHT_CONCURRENCY: ""
+  CELERY_WORKER_DOCPROCESSING_CONCURRENCY: "8"
+  CELERY_WORKER_LIGHT_CONCURRENCY: "8"
   CELERY_WORKER_LIGHT_PREFETCH_MULTIPLIER: ""
-  CELERY_WORKER_USER_FILE_PROCESSING_CONCURRENCY: ""
+  CELERY_WORKER_USER_FILE_PROCESSING_CONCURRENCY: "8"
   # OnyxBot SlackBot Configs
   ONYX_BOT_DISABLE_DOCS_ONLY_ANSWER: ""
   ONYX_BOT_DISPLAY_ERROR_MSGS: ""
