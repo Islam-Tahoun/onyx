@@ -9,8 +9,9 @@ export const theme = css`
   ${colors}
 
   :host {
-    /* Typography - Hanken Grotesk */
-    --onyx-font-family: "Hanken Grotesk", -apple-system, BlinkMacSystemFont,
+    /* Typography - IBM Plex Sans Arabic */
+    --onyx-font-family: "IBM Plex Sans Arabic", -apple-system,
+      BlinkMacSystemFont,
       "Segoe UI", sans-serif;
     --onyx-font-family-mono: "DM Mono", "Monaco", "Menlo", monospace;
 

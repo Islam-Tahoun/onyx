@@ -3,6 +3,7 @@ from typing import cast
 from typing import IO
 from typing import TYPE_CHECKING
 
+from onyx.configs.app_configs import UNSTRUCTURED_API_URL
 from onyx.configs.constants import KV_UNSTRUCTURED_API_KEY
 from onyx.key_value_store.factory import get_kv_store
 from onyx.key_value_store.interface import KvKeyNotFoundError
@@ -53,14 +54,36 @@ def _sdk_partition_request(
         raise
 
 
+def _build_unstructured_client(api_key: str | None) -> Any:
+    from unstructured_client import UnstructuredClient
+
+    client_kwargs: dict[str, Any] = {"api_key_auth": api_key}
+    if not UNSTRUCTURED_API_URL:
+        return UnstructuredClient(**client_kwargs)
+
+    for url_kwarg in ("server_url", "url", "base_url"):
+        try:
+            return UnstructuredClient(
+                **client_kwargs,
+                **{url_kwarg: UNSTRUCTURED_API_URL},
+            )
+        except TypeError:
+            continue
+
+    logger.warning(
+        "UNSTRUCTURED_API_URL is set but this unstructured-client version does not "
+        "support overriding the API base URL. Falling back to default endpoint."
+    )
+    return UnstructuredClient(**client_kwargs)
+
+
 def unstructured_to_text(file: IO[Any], file_name: str) -> str:
     from unstructured.staging.base import dict_to_elements
-    from unstructured_client import UnstructuredClient
 
     logger.debug(f"Starting to read file: {file_name}")
     req = _sdk_partition_request(file, file_name, strategy="fast")
 
-    unstructured_client = UnstructuredClient(api_key_auth=get_unstructured_api_key())
+    unstructured_client = _build_unstructured_client(get_unstructured_api_key())
 
     response = unstructured_client.general.partition(request=req)
 
