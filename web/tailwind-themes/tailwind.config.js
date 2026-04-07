@@ -41,6 +41,14 @@ module.exports = {
         "2xl": "1420px",
         "3xl": "1700px",
         "4xl": "2000px",
+        mobile: { max: "724px" },
+        tall: { raw: "(min-height: 800px)" },
+        short: { raw: "(max-height: 799px)" },
+        "very-short": { raw: "(max-height: 600px)" },
+      },
+      fontFamily: {
+        sans: ["var(--font-ibm-plex-sans-arabic)", "sans-serif"],
+        hanken: ["var(--font-ibm-plex-sans-arabic)", "sans-serif"],
       },
       width: {
         "message-xs": "450px",
