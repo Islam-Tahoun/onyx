@@ -9,7 +9,7 @@ import { PHProvider } from "./providers";
 import { Suspense } from "react";
 import PostHogPageView from "./PostHogPageView";
 import Script from "next/script";
-import { DM_Mono, Hanken_Grotesk } from "next/font/google";
+import { DM_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { WebVitals } from "./web-vitals";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
@@ -21,9 +21,10 @@ import CustomAnalyticsScript from "@/providers/CustomAnalyticsScript";
 import ProductGatingWrapper from "@/providers/ProductGatingWrapper";
 import SWRConfigProvider from "@/providers/SWRConfigProvider";
 
-const hankenGrotesk = Hanken_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-hanken-grotesk",
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["latin", "arabic"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-ibm-plex-sans-arabic",
   display: "swap",
   fallback: [
     "-apple-system",
@@ -69,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(hankenGrotesk.variable, dmMono.variable)}
+      className={cn(ibmPlexSansArabic.variable, dmMono.variable)}
       suppressHydrationWarning
     >
       <head>
