@@ -357,3 +357,6 @@ pre[class*="language-"] {
 .markdown-table-breakout[data-scrolled="true"] td:first-child::after {
   opacity: 1;
 }
+.force-ltr{
+  direction: ltr;
+}

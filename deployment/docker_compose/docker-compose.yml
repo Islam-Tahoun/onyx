@@ -99,10 +99,10 @@ services:
       - LICENSE_ENFORCEMENT_ENABLED=false
       ## Gen AI Settings
       - GEN_AI_MAX_TOKENS=32000
-      - LLM_SOCKET_READ_TIMEOUT=600
+      - LLM_SOCKET_READ_TIMEOUT=3000
       # MAX_CHUNKS_FED_TO_CHAT=
       - DISABLE_LITELLM_STREAMING=false
-      - WEB_DOMAIN=https://spark-f58b.tail404692.ts.net
+      - WEB_DOMAIN=https://spark-f58b.tail5fad0b.ts.net
 
     # PRODUCTION: Uncomment the line below to use if IAM_AUTH is true and you are using iam auth for postgres
     # volumes:
@@ -190,7 +190,7 @@ services:
       - VENV_TEMPLATE_PATH=${VENV_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/venv}
       - WEB_TEMPLATE_PATH=${WEB_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs/web}
       - PERSISTENT_DOCUMENT_STORAGE_PATH=${PERSISTENT_DOCUMENT_STORAGE_PATH:-/app/file-system}
-      - LLM_SOCKET_READ_TIMEOUT=600
+      - LLM_SOCKET_READ_TIMEOUT=3000
     # PRODUCTION: Uncomment the line below to use if IAM_AUTH is true and you are using iam auth for postgres
     # volumes:
     #   - ./bundle.pem:/app/bundle.pem:ro
