@@ -124,7 +124,7 @@ export const CodeBlock = memo(function CodeBlock({
           )}
         >
           {language && (
-            <div className="flex items-center px-2 py-1 text-sm text-text-04 gap-x-2">
+            <div className="flex items-center px-2 py-1 text-sm text-text-04 gap-x-2 force-ltr">
               <SvgCode
                 height={12}
                 width={12}

@@ -77,7 +77,7 @@ export default function Logo({ folded, size, className }: LogoProps) {
                 nowrap
               >
                 {/* Powered by Onyx */}
-                Empowering Innovation
+                Enterprise System
               </Text>
             )}
           </div>
