@@ -44,6 +44,7 @@ services:
       dockerfile: Dockerfile
       args:
         - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
+        - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
     command: >
       /bin/sh -c "alembic upgrade head &&
       echo \"Starting Onyx Api Server\" &&
@@ -98,8 +99,8 @@ services:
       - ENABLE_PAID_ENTERPRISE_EDITION_FEATURES=True
       - LICENSE_ENFORCEMENT_ENABLED=false
       ## Gen AI Settings
-      - GEN_AI_MAX_TOKENS=32000
-      - LLM_SOCKET_READ_TIMEOUT=30000
+      - GEN_AI_MAX_TOKENS=128000
+      - LLM_SOCKET_READ_TIMEOUT=5000
       # MAX_CHUNKS_FED_TO_CHAT=
       - DISABLE_LITELLM_STREAMING=false
       - WEB_DOMAIN=https://spark-f58b.tail404692.ts.net
