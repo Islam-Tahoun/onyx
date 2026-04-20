@@ -1,7 +1,14 @@
 import { cn } from "@opal/utils";
 import Text from "@/refresh-components/texts/Text";
-import React, { useState, ReactNode, useCallback, useMemo, memo } from "react";
+import React, {
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+  memo,
+} from "react";
 import { SvgCheck, SvgCode, SvgCopy } from "@opal/icons";
+import { renderMermaidSVG } from "beautiful-mermaid";
 
 interface CodeBlockProps {
   className?: string;
@@ -14,6 +21,81 @@ interface CodeBlockProps {
 const MemoizedCodeLine = memo(({ content }: { content: ReactNode }) => (
   <>{content}</>
 ));
+
+function normalizeMermaidCode(input: string) {
+  const trimmed = input.trim();
+
+  return trimmed
+    .replace(/^```mermaid\s*\n?/i, "")
+    .replace(/^```\s*\n?/i, "")
+    .replace(/\n?```\s*$/i, "")
+    .trim();
+}
+
+function isIncompleteMermaidBlock(input: string) {
+  const trimmed = input.trim();
+
+  return /^```mermaid\s*$/i.test(trimmed);
+}
+
+const MermaidRenderer = memo(function MermaidRenderer({
+  code,
+}: {
+  code: string;
+}) {
+  const normalizedCode = useMemo(() => normalizeMermaidCode(code), [code]);
+  const isStreamingFence = useMemo(() => isIncompleteMermaidBlock(code), [code]);
+
+  const { svg, error } = useMemo(() => {
+    if (!normalizedCode || isStreamingFence) {
+      return { svg: null, error: null };
+    }
+
+    try {
+      const renderedSvg = renderMermaidSVG(normalizedCode, {
+        bg: "var(--background-tint-00)",
+        fg: "var(--text-05)",
+        accent: "var(--action-text-link-05)",
+        muted: "var(--text-03)",
+        border: "var(--border-02)",
+        transparent: true,
+        interactive: true,
+      });
+
+      return { svg: renderedSvg, error: null };
+    } catch (err) {
+      return {
+        svg: null,
+        error:
+          err instanceof Error
+            ? err.message
+            : "Failed to render Mermaid diagram.",
+      };
+    }
+  }, [normalizedCode, isStreamingFence]);
+
+  if (error) {
+    return (
+      <div className="p-3 text-sm text-red-500 font-mono whitespace-pre-wrap break-words">
+        {error}
+      </div>
+    );
+  }
+
+  if (!svg) return null;
+
+  return (
+    <div
+      data-testid="mermaid-diagram"
+      className="w-full min-w-0 overflow-hidden p-2 
+      [&_svg]:h-auto 
+      [&_svg]:max-w-full 
+      [&_svg]:w-full 
+      [&_svg_*]:[font-family:var(--font-hanken-grotesk)]"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+});
 
 export const CodeBlock = memo(function CodeBlock({
   className = "",
@@ -34,6 +116,7 @@ export const CodeBlock = memo(function CodeBlock({
 
   const handleCopy = useCallback(() => {
     if (!codeText) return;
+
     navigator.clipboard.writeText(codeText).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -87,6 +170,14 @@ export const CodeBlock = memo(function CodeBlock({
   }
 
   const CodeContent = () => {
+    if (language === "mermaid") {
+      return (
+        <div className="!p-2 m-0 w-full min-w-0 overflow-hidden">
+          <MermaidRenderer code={codeText} />
+        </div>
+      );
+    }
+
     if (!language) {
       return (
         <pre className="!p-2 m-0 overflow-x-auto w-0 min-w-full hljs">
@@ -103,7 +194,7 @@ export const CodeBlock = memo(function CodeBlock({
 
     return (
       <pre className="!p-2 m-0 overflow-x-auto w-0 min-w-full hljs">
-        <code className="text-xs">
+        <code className={`text-xs hljs ${className}`}>
           {Array.isArray(children)
             ? children.map((child, index) => (
                 <MemoizedCodeLine key={index} content={child} />
@@ -146,3 +237,4 @@ export const CodeBlock = memo(function CodeBlock({
 
 CodeBlock.displayName = "CodeBlock";
 MemoizedCodeLine.displayName = "MemoizedCodeLine";
+MermaidRenderer.displayName = "MermaidRenderer";

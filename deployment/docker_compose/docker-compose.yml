@@ -43,7 +43,7 @@ services:
       context: ../../backend
       dockerfile: Dockerfile
       args:
-        - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+        - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
     command: >
       /bin/sh -c "alembic upgrade head &&
       echo \"Starting Onyx Api Server\" &&
@@ -90,7 +90,7 @@ services:
       - S3_AWS_SECRET_ACCESS_KEY=${S3_AWS_SECRET_ACCESS_KEY:-minioadmin}
       # Onyx Craft configuration (disabled by default, set ENABLE_CRAFT=true in .env to enable)
       # Use --include-craft with install script, or manually set in .env file
-      - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+      - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
       - OUTPUTS_TEMPLATE_PATH=${OUTPUTS_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs}
       - VENV_TEMPLATE_PATH=${VENV_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/venv}
       - WEB_TEMPLATE_PATH=${WEB_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs/web}
@@ -98,8 +98,8 @@ services:
       - ENABLE_PAID_ENTERPRISE_EDITION_FEATURES=True
       - LICENSE_ENFORCEMENT_ENABLED=false
       ## Gen AI Settings
-      - GEN_AI_MAX_TOKENS=32000
-      - LLM_SOCKET_READ_TIMEOUT=3000
+      - GEN_AI_MAX_TOKENS=128000
+      - LLM_SOCKET_READ_TIMEOUT=5000
       # MAX_CHUNKS_FED_TO_CHAT=
       - DISABLE_LITELLM_STREAMING=false
       - WEB_DOMAIN=https://spark-f58b.tail5fad0b.ts.net
@@ -138,7 +138,7 @@ services:
       context: ../../backend
       dockerfile: Dockerfile
       args:
-        - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+        - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
     command: >
       /bin/sh -c "
       if [ -f /app/scripts/setup_craft_templates.sh ]; then
@@ -185,7 +185,7 @@ services:
       - API_SERVER_PROTOCOL=${API_SERVER_PROTOCOL:-http}
       - API_SERVER_HOST=${API_SERVER_HOST:-api_server}
       # Onyx Craft configuration (set up automatically on container startup)
-      - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+      - ENABLE_CRAFT=${ENABLE_CRAFT:-true}
       - OUTPUTS_TEMPLATE_PATH=${OUTPUTS_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs}
       - VENV_TEMPLATE_PATH=${VENV_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/venv}
       - WEB_TEMPLATE_PATH=${WEB_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs/web}
