@@ -50,7 +50,9 @@ def _sdk_partition_request(
         )
         return request
     except Exception as e:
-        logger.error(f"Error creating partition request for file {file_name}: {str(e)}")
+        logger.error(
+            "Error creating partition request for file %s: %s", file_name, str(e)
+        )
         raise
 
 
@@ -80,7 +82,7 @@ def _build_unstructured_client(api_key: str | None) -> Any:
 def unstructured_to_text(file: IO[Any], file_name: str) -> str:
     from unstructured.staging.base import dict_to_elements
 
-    logger.debug(f"Starting to read file: {file_name}")
+    logger.debug("Starting to read file: %s", file_name)
     req = _sdk_partition_request(file, file_name, strategy="fast")
 
     unstructured_client = _build_unstructured_client(get_unstructured_api_key())
