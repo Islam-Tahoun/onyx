@@ -730,6 +730,8 @@ pyparsing==3.2.5
     # via httplib2
 pypdf==6.10.2
     # via unstructured-client
+pypdfium2==5.8.0
+    # via onyx
 pyperclip==1.11.0
     # via fastmcp
 pyreadline3==3.5.4 ; sys_platform == 'win32'

@@ -72,6 +72,7 @@ backend = [
     # get_markitdown_converter in
     # backend/onyx/file_processing/extract_file_text.py and what impacts
     # updating might have on this behavior.
+    "pypdfium2==5.8.0",
     "markitdown[pdf, docx, pptx, xlsx, xls]==0.1.2",
     "mcp[cli]==1.27.0",
     "msal==1.34.0",
