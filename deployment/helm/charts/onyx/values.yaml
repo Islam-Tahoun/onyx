@@ -110,6 +110,45 @@ postgresql:
 vectorDB:
   enabled: true
 
+vespa:
+  name: da-vespa-0
+  service:
+    name: vespa-service
+  volumeClaimTemplates:
+    - metadata:
+        name: vespa-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 30Gi
+        storageClassName: ""
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: vespa
+    tag: "8.609.39"
+  podAnnotations: {}
+  podLabels:
+    app: vespa
+    app.kubernetes.io/instance: onyx
+    app.kubernetes.io/name: vespa
+  securityContext:
+    privileged: true
+    runAsUser: 0
+  resources:
+    # The Vespa Helm chart specifies default resources, which are quite modest. We override
+    # them here to increase chances of the chart running successfully. If you plan to index at
+    # scale, you will likely need to increase these limits further.
+    # At large scale, it is recommended to use a dedicated Vespa cluster / Vespa cloud.
+    requests:
+      cpu: 4000m
+      memory: 8000Mi
+    limits:
+      cpu: 8000m
+      memory: 32000Mi
+
 opensearch:
   # Enabled by default. Override to false and set the appropriate env vars in
   # the instance-specific values yaml if using AWS-managed OpenSearch, or simply
@@ -125,7 +164,7 @@ opensearch:
   nodeGroup: "master"
   masterService: "onyx-opensearch-master"
 
-  replicas: 1
+  replicas: 2
 
   image:
     repository: "opensearchproject/opensearch"
@@ -203,10 +242,10 @@ inferenceCapability:
   # embedding.
   resources:
     requests:
-      cpu: 1000m
-      memory: 3Gi
+      cpu: 5000m
+      memory: 5Gi
     limits:
-      cpu: 4000m
+      cpu: 9000m
       memory: 10Gi
   # Optional health probes
   # Example:
@@ -259,7 +298,7 @@ indexCapability:
     type: ClusterIP
     servicePort: 9000
     targetPort: 9000
-  replicaCount: 1
+  replicaCount: 2
   name: indexing-model-server
   deploymentLabels:
     app: indexing-model-server
@@ -273,19 +312,14 @@ indexCapability:
     repository: onyxdotapp/onyx-model-server
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-  limitConcurrency: 10
-  # Indexing embeds in batches and tolerates throttling at low ingest volume;
-  # the limit, not the request, governs re-index throughput. Deployments doing
-  # sustained large re-indexes should raise the CPU limit (and consider a
-  # second replica) — an embedder pegged at its limit for hours can starve
-  # docprocessing heartbeats and trip the indexing watchdog.
+  limitConcurrency: 80
   resources:
     requests:
-      cpu: 1000m
-      memory: 3Gi
-    limits:
-      cpu: 6000m
+      cpu: 8000m
       memory: 6Gi
+    limits:
+      cpu: 12000m
+      memory: 12Gi
   # Optional health probes
   # Example:
   # readinessProbe:
@@ -455,11 +489,11 @@ webserver:
 
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 3000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 6000m
+      memory: 4Gi
 
   # Optional health probes
   # Example:
@@ -568,11 +602,11 @@ api:
   # request at or above 1Gi.
   resources:
     requests:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 2000m
+      memory: 4Gi
     limits:
-      cpu: 3000m
-      memory: 3Gi
+      cpu: 8000m
+      memory: 9Gi
 
   # Optional health probes.
   #
@@ -710,11 +744,11 @@ celery_beat:
     app: celery-beat
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 1Gi
+      cpu: 4000m
+      memory: 4Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -751,11 +785,11 @@ celery_worker_heavy:
   # OOMed in production on big syncs.
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: 1000m
+      cpu: 2000m
       memory: 4Gi
+    limits:
+      cpu: 8000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -763,13 +797,8 @@ celery_worker_heavy:
   affinity: {}
 
 celery_worker_docprocessing:
-  extraEnv: []
-  replicaCount: 1
-  # Per-worker log level override. Empty (default) means use the global
-  # LOG_LEVEL env var. Set to INFO/DEBUG/WARNING/etc. to override LOG_LEVEL for
-  # this worker only — this becomes `--loglevel=<value>` on the celery worker
-  # command and takes precedence over LOG_LEVEL inside the worker process.
-  logLevel: ""
+  replicaCount: 4
+  logLevel: INFO
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -790,11 +819,11 @@ celery_worker_docprocessing:
     app: celery-worker-docprocessing
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 4Gi
     limits:
-      cpu: 1000m
-      memory: 12Gi
+      cpu: 6000m
+      memory: 18Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -829,11 +858,11 @@ celery_worker_light:
     app: celery-worker-light
   resources:
     requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
       cpu: 2000m
-      memory: 4Gi
+      memory: 2Gi
+    limits:
+      cpu: 8000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -868,11 +897,11 @@ celery_worker_monitoring:
     app: celery-worker-monitoring
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 2000m
+      memory: 2Gi
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: 6000m
+      memory: 6Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -907,11 +936,11 @@ celery_worker_primary:
     app: celery-worker-primary
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 6Gi
     limits:
-      cpu: 1000m
-      memory: 4Gi
+      cpu: 6000m
+      memory: 12Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -946,11 +975,11 @@ celery_worker_user_file_processing:
     app: celery-worker-user-file-processing
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
-    limits:
       cpu: 2000m
       memory: 2Gi
+    limits:
+      cpu: 6000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -990,11 +1019,11 @@ celery_worker_scheduled_tasks:
     app: celery-worker-scheduled-tasks
   resources:
     requests:
-      cpu: 500m
-      memory: 512Mi
-    limits:
       cpu: 2000m
       memory: 2Gi
+    limits:
+      cpu: 6000m
+      memory: 8Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -1116,16 +1145,8 @@ mcpServer:
   affinity: {}
 
 celery_worker_docfetching:
-  extraEnv: []
-  replicaCount: 1
-  # Grace for the watchdog to mark its in-flight attempt INTERRUPTED and stop its
-  # subprocess on SIGTERM. Must exceed the watchdog poll interval + subprocess grace.
-  terminationGracePeriodSeconds: 60
-  # Per-worker log level override. Empty (default) means use the global
-  # LOG_LEVEL env var. Set to INFO/DEBUG/WARNING/etc. to override LOG_LEVEL for
-  # this worker only — this becomes `--loglevel=<value>` on the celery worker
-  # command and takes precedence over LOG_LEVEL inside the worker process.
-  logLevel: ""
+  replicaCount: 4
+  logLevel: INFO
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -1146,11 +1167,11 @@ celery_worker_docfetching:
     app: celery-worker-docfetching
   resources:
     requests:
-      cpu: 500m
-      memory: 2Gi
+      cpu: 2000m
+      memory: 6Gi
     limits:
-      cpu: 1000m
-      memory: 16Gi
+      cpu: 4000m
+      memory: 20Gi
   volumes: []  # Additional volumes on the output Deployment definition.
   volumeMounts: []  # Additional volumeMounts on the output Deployment definition.
   nodeSelector: {}
@@ -1178,11 +1199,11 @@ redis:
     serviceType: ClusterIP
     resources:
       requests:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 4000m
+        memory: 1Gi
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 8000m
+        memory: 4Gi
     # Use existing secret for Redis password
     redisSecret:
       secretName: onyx-redis
@@ -1193,7 +1214,7 @@ redis:
     data: |
       appendonly no
       save ""
-      maxmemory 400mb
+      maxmemory 2gb
       maxmemory-policy allkeys-lru
       timeout 0
       tcp-keepalive 300
@@ -1236,24 +1257,95 @@ minio:
 codeInterpreter:
   enabled: true
 
-  # Used by the parent chart to compose CODE_INTERPRETER_BASE_URL; must match
-  # the subchart's service port.
+  replicaCount: 3
+
+  image:
+    repository: onyxdotapp/code-interpreter
+    pullPolicy: Always
+    tag: ""  # Empty uses chart appVersion
+
+  # Service configuration
   service:
     port: 8000
+    targetPort: 8000
 
-# Values passed through to the code-interpreter subchart.
-code-interpreter:
-  # API container resources. Workspace archives staged into sandboxes are
-  # routinely tens of MB and the base64-encoded snapshot path roughly doubles
-  # in-flight memory; the subchart's default 512Mi limit repeatedly OOMKilled
-  # this pod in production (and parent OOMs leak spawned code-exec pods).
+  # Execution limits
+  codeInterpreter:
+    maxExecTimeoutMs: 660000
+    maxOutputBytes: "9000000"
+    cpuTimeLimitSec: 15
+    memoryLimitMb: 1024
+    host: "0.0.0.0"
+    port: 8000
+
+    # Kubernetes executor configuration (creates pods for code execution)
+    kubernetesExecutor:
+      namespace: ""  # Empty = same namespace as release
+      image: ""  # Empty = default sandbox image
+      serviceAccount: ""
+      podResources:
+        limits:
+          cpu: "1"
+          memory: "256Mi"
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+
+  # API container resources
   resources:
     requests:
-      cpu: 100m
-      memory: 512Mi
-    limits:
       cpu: 1000m
-      memory: 2Gi
+      memory: 1Gi
+    limits:
+      cpu: 9000m
+      memory: 4Gi
+
+  # RBAC for pod management (required for kubernetes executor)
+  rbac:
+    create: true
+
+  # Security context
+  podSecurityContext:
+    runAsNonRoot: false
+    runAsUser: 1000
+    fsGroup: 1000
+
+  securityContext:
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: false
+    runAsNonRoot: false
+    runAsUser: 1000
+    allowPrivilegeEscalation: true
+
+  # Health probes
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+  # Optional features
+  ingress:
+    enabled: false
+  networkPolicy:
+    enabled: false
+  serviceAccount:
+    create: true
+    automount: true
 
 ingress:
   enabled: false
@@ -1565,9 +1657,7 @@ configMap:
   AZURE_STORAGE_ACCOUNT_URL: ""
   # Gen AI Settings
   GEN_AI_MAX_TOKENS: ""
-  LLM_SOCKET_READ_TIMEOUT: "60"
-  IMAGE_SUMMARIZATION_TIMEOUT: "300"
-  CONTEXTUAL_RAG_LLM_TIMEOUT: "180"
+  LLM_SOCKET_READ_TIMEOUT: "180"
   MAX_CHUNKS_FED_TO_CHAT: ""
   # Usage / cost accounting
   # Records priced generation spans into the per-user usage ledger (default on).
@@ -1595,11 +1685,8 @@ configMap:
   MODEL_SERVER_PORT: ""
   MIN_THREADS_ML_MODELS: ""
   # Indexing Configs
-  NUM_INDEXING_WORKERS: ""
-  # Fail an indexing attempt when its worker exceeds this RSS (MB) instead of
-  # letting the pod get OOM-killed; "" = disabled
-  INDEXING_WORKER_MEMORY_LIMIT_MB: ""
-  INDEXING_WORKER_TRACEMALLOC: ""
+  VESPA_SEARCHER_THREADS: ""
+  NUM_INDEXING_WORKERS: "6"
   DISABLE_INDEX_UPDATE_ON_SWAP: ""
   # OpenSearch Point-In-Time keep-alive for the reindex/port scan (default 5m)
   PIT_KEEP_ALIVE: ""
@@ -1622,14 +1709,10 @@ configMap:
   DOCUMENT_PUSH_API_KEY: ""
   DOCUMENT_PUSH_TIMEOUT_SECONDS: ""
   # Worker Parallelism
-  CELERY_WORKER_DOCPROCESSING_CONCURRENCY: ""
-  CELERY_WORKER_LIGHT_CONCURRENCY: ""
+  CELERY_WORKER_DOCPROCESSING_CONCURRENCY: "8"
+  CELERY_WORKER_LIGHT_CONCURRENCY: "8"
   CELERY_WORKER_LIGHT_PREFETCH_MULTIPLIER: ""
-  CELERY_WORKER_USER_FILE_PROCESSING_CONCURRENCY: ""
-  # Per-connector external group sync lock TTL in seconds (default 300); raise
-  # toward the 6h crawl deadline if group syncs run long, so periodic
-  # re-dispatches can't start concurrent duplicate syncs.
-  CELERY_EXTERNAL_GROUP_SYNC_LOCK_TIMEOUT: ""
+  CELERY_WORKER_USER_FILE_PROCESSING_CONCURRENCY: "8"
   # OnyxBot SlackBot Configs
   ONYX_BOT_DISABLE_DOCS_ONLY_ANSWER: ""
   ONYX_BOT_DISPLAY_ERROR_MSGS: ""
