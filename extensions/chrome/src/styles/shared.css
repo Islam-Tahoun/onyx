@@ -1,6 +1,8 @@
 /* Import Hanken Grotesk font */
 @import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700&display=swap");
 
+@import url('https://fonts.googleapis.com/css2?family=Zain:ital,wght@0,200;0,300;0,400;0,700;0,800;0,900;1,300;1,400&display=swap');
+
 :root {
   --primary-color: #4285f4;
   --primary-hover-color: #3367d6;
@@ -12,7 +14,7 @@
   --card-background-color: #fff;
   --border-color: #ccc;
   --font-family: Arial, sans-serif;
-  --font-hanken-grotesk: "Hanken Grotesk", sans-serif;
+  --font-hanken-grotesk: "Zain", "Hanken Grotesk", sans-serif;
 }
 
 body {

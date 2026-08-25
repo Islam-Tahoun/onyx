@@ -65,17 +65,17 @@ export function Logo({ folded, size, className, onyxBranded }: LogoProps) {
             {opts.includeName && (
               <Truncated headingH3>{applicationName}</Truncated>
             )}
-            {!NEXT_PUBLIC_DO_NOT_USE_TOGGLE_OFF_DANSWER_POWERED &&
-              !enterprise?.hide_onyx_branding && (
-                <Text
-                  secondaryBody
-                  text03
-                  className={"line-clamp-1 truncate"}
-                  nowrap
-                >
-                  Powered by Onyx
-                </Text>
-              )}
+            {!NEXT_PUBLIC_DO_NOT_USE_TOGGLE_OFF_DANSWER_POWERED && (
+              <Text
+                secondaryBody
+                text03
+                className={"line-clamp-1 truncate"}
+                nowrap
+              >
+                {/* Powered by Onyx */}
+                Empowering Innovation
+              </Text>
+            )}
           </div>
         )}
       </div>
