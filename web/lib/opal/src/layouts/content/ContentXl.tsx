@@ -203,6 +203,7 @@ function ContentXl({
           <Text
             font={config.titleFont}
             color="inherit"
+            dir="auto"
             maxLines={1}
             title={toPlainString(title)}
             onClick={editable ? startEditing : undefined}

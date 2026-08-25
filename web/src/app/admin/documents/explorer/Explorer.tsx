@@ -1,11 +1,11 @@
 "use client";
 
 import { adminSearch } from "./lib";
-import { MagnifyingGlass } from "@phosphor-icons/react";
 import { useState, useEffect, useCallback } from "react";
 import { OnyxDocument } from "@/lib/search/interfaces";
 import { buildDocumentSummaryDisplay } from "@/components/search/DocumentDisplay";
-import { Checkbox } from "@opal/components";
+import { Button, Checkbox } from "@opal/components";
+import { SvgDownload } from "@opal/icons";
 import { updateHiddenStatus } from "../lib";
 import { toast } from "@/hooks/useToast";
 import { getErrorMsg } from "@/lib/fetchUtils";
@@ -33,10 +33,10 @@ const DocumentDisplay = ({
       key={document.document_id}
       className="text-sm border-b border-border mb-3"
     >
-      <div className="flex relative">
+      <div className="flex relative items-center justify-between">
         <a
           className={
-            "rounded-lg flex font-bold " +
+            "rounded-lg flex min-w-0 font-bold " +
             (document.link ? "" : "pointer-events-none")
           }
           href={document.link}
@@ -47,6 +47,21 @@ const DocumentDisplay = ({
           <p className="truncate break-all ml-2 my-auto text-base">
             {document.semantic_identifier || document.document_id}
           </p>
+        </a>
+        <a
+          href={`/api/document/document-content?document_id=${encodeURIComponent(
+            document.document_id
+          )}`}
+          download
+          className="ml-2 shrink-0"
+          aria-label="Download document content"
+        >
+          <Button
+            prominence="tertiary"
+            size="sm"
+            icon={SvgDownload}
+            tooltip="Download document"
+          />
         </a>
       </div>
       <div className="flex flex-wrap gap-x-2 mt-1 text-xs">

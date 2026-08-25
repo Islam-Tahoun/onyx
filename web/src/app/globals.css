@@ -493,3 +493,16 @@ textarea {
   margin: 0.5rem;
   max-height: calc(100% - 1rem);
 }
+
+.login-bg-image{
+  background-image: url("/bg_images/login_bg.webp");
+  background-position: center left;
+  background-size: cover;
+}
+
+.light .inner-default-bg-image{
+  background-image: url("/bg_images/inner_bg1.webp");
+  background-position: center -100px;
+  background-size: contain;
+  background-repeat: no-repeat;
+}

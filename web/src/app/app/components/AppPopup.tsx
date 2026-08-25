@@ -77,7 +77,7 @@ export function AppPopup() {
       <Modal.Content width="sm" height="lg">
         <Modal.Header
           icon={headerIcon}
-          title={popupTitle || "Welcome to Onyx!"}
+          title={popupTitle || "Welcome to CST AI Hub!"}
         />
         <Modal.Body>
           <div className="overflow-y-auto text-left">

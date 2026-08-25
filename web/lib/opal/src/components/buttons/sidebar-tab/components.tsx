@@ -103,11 +103,11 @@ function SidebarTab({
             />
           )}
 
-          {!folded && rightChildren && (
+          {/* {!folded && rightChildren && (
             <div className="absolute z-[100] right-1.5 top-0 bottom-0 flex flex-col justify-center items-center pointer-events-auto">
               {rightChildren}
             </div>
-          )}
+          )} */}
 
           {typeof children === "string" ? (
             <ContentAction

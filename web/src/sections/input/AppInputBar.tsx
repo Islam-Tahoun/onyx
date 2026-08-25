@@ -821,6 +821,7 @@ const AppInputBar = React.memo(
                   >
                     <textarea
                       id="onyx-chat-input-textarea"
+                      dir="auto"
                       role="textarea"
                       ref={textAreaRef}
                       onPaste={handlePaste}

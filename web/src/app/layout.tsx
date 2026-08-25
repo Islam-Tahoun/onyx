@@ -51,7 +51,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Onyx",
+  title: "CST AI Hub",
   description: "Question answering for your documents",
 };
 
@@ -102,7 +102,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="text-text min-h-screen bg-background">
+          <div className="text-text min-h-screen bg-background inner-default-bg-image">
             <TooltipProvider>
               <PHProvider>
                 <SWRConfigProvider>
