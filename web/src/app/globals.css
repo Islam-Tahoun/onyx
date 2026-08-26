@@ -1,21 +1,21 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400&display=swap");
+@import "tailwindcss";
+@config "../../tailwind-themes/tailwind.config.js";
+@custom-variant tall (@media (min-height: 800px));
+@custom-variant short (@media (max-height: 799px));
+@custom-variant very-short (@media (max-height: 600px));
 
-@import "css/attachment-button.css";
-@import "css/button.css";
-@import "css/content-editable.css";
-@import "css/card.css";
-@import "css/code.css";
-@import "css/color-swatch.css";
-@import "css/colors.css";
-@import "css/divider.css";
-@import "css/general-layouts.css";
-@import "css/inputs.css";
-@import "css/knowledge-table.css";
-@import "css/line-item.css";
-@import "css/sizes.css";
-@import "css/square-button.css";
-@import "css/switch.css";
-@import "css/z-index.css";
+@import "./css/content-editable.css";
+@import "./css/card.css";
+@import "./css/color-swatch.css";
+@import "./css/colors.css";
+@import "./css/divider.css";
+@import "./css/general-layouts.css";
+@import "./css/inputs.css";
+@import "./css/knowledge-table.css";
+@import "./css/line-item.css";
+@import "./css/square-button.css";
+@import "./css/z-index.css";
 
 /* KH Teka Font */
 
@@ -26,10 +26,6 @@
   font-style: normal;
   font-display: swap;
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
   *,
@@ -385,7 +381,6 @@
   .inputscroll {
     scrollbar-width: none;
   }
-}
 
 @layer base {
   * {

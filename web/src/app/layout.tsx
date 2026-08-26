@@ -13,7 +13,6 @@ import {
 } from "@/lib/analytics/shared";
 import Script from "next/script";
 import { DM_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
-import { WebVitals } from "./web-vitals";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import StatsOverlayLoader from "@/components/dev/StatsOverlayLoader";

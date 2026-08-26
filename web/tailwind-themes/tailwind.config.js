@@ -42,9 +42,6 @@ module.exports = {
         "3xl": "1700px",
         "4xl": "2000px",
         mobile: { max: "724px" },
-        tall: { raw: "(min-height: 800px)" },
-        short: { raw: "(max-height: 799px)" },
-        "very-short": { raw: "(max-height: 600px)" },
       },
       fontFamily: {
         sans: ["var(--font-ibm-plex-sans-arabic)", "sans-serif"],
