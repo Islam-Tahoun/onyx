@@ -23,8 +23,8 @@ export const XlHeadline: Story = {
   args: {
     sizePreset: "headline",
     variant: "heading",
-    title: "Welcome to Onyx",
-    description: "Your enterprise search and AI assistant platform.",
+    title: "Welcome to CST AI Hub",
+    description: "CST enterprise AI platform.",
   },
 };
 

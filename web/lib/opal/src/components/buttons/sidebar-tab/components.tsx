@@ -223,9 +223,11 @@ function SidebarTab({
         <Interactive.Container rounding={2} size="lg" width="full">
           {trigger}
 
-          {rightChildren && (
-            <div className="opal-sidebar-tab__actions">{rightChildren}</div>
-          )}
+          {/* {!folded && rightChildren && (
+            <div className="absolute z-[100] right-1.5 top-0 bottom-0 flex flex-col justify-center items-center pointer-events-auto">
+              {rightChildren}
+            </div>
+          )} */}
 
           {label !== undefined ? (
             <ContentAction

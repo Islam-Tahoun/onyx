@@ -41,6 +41,7 @@ export default function AuthFlowContainer({
         <div className="text-sm mt-6 text-center w-full text-text-03 mainUiBody mx-auto">
           {footerContent ?? (
             <>
+{/*             
               <Text font="main-ui-body" color="text-03">
                 {`New to ${appName}?`}
               </Text>{" "}
@@ -49,7 +50,7 @@ export default function AuthFlowContainer({
                 className="text-text-05 mainUiAction underline transition-colors duration-200"
               >
                 Create an Account
-              </Link>
+              </Link> */}
             </>
           )}
         </div>

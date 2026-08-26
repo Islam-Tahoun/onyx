@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from onyx.auth.permissions import require_permission
+from onyx.auth.users import current_curator_or_admin_user
 from onyx.context.search.models import IndexFilters
 from onyx.context.search.preprocessing.access_filters import (
     build_access_filters_for_user,
@@ -18,6 +19,15 @@ from onyx.server.documents.models import ChunkInfo, DocumentInfo
 from onyx.server.utils_vector_db import require_vector_db
 
 router = APIRouter(prefix="/document")
+
+
+def _document_download_filename(semantic_identifier: str | None) -> str:
+    filename = re.sub(
+        r'[\x00-\x1f\x7f/\\:*?"<>|]',
+        "_",
+        semantic_identifier or "document",
+    ).strip(" .")
+    return f"{filename or 'document'}.md"
 
 
 # Have to use a query parameter as FastAPI is interpreting the URL type document_ids
@@ -63,6 +73,38 @@ def get_document_info(
     return DocumentInfo(
         num_chunks=len(inference_chunks),
         num_tokens=len(tokenizer_encode(full_context_str)),
+    )
+
+
+@router.get("/document-content", dependencies=[Depends(require_vector_db)])
+def download_document_content(
+    document_id: str = Query(...),
+    user: User = Depends(current_curator_or_admin_user),
+    db_session: Session = Depends(get_session),
+) -> Response:
+    """Download all indexed content for a document as a plain-text file."""
+    search_settings = get_current_search_settings(db_session)
+    document_index = get_default_document_index(search_settings, None, db_session)
+
+    user_acl_filters = build_access_filters_for_user(user, db_session)
+    inference_chunks = document_index.id_based_retrieval(
+        chunk_requests=[VespaChunkRequest(document_id=document_id)],
+        filters=IndexFilters(access_control_list=user_acl_filters),
+    )
+
+    if not inference_chunks:
+        raise OnyxError(OnyxErrorCode.DOCUMENT_NOT_FOUND, "Document not found")
+
+    inference_chunks.sort(key=lambda chunk: chunk.chunk_id)
+    document_content = "\n\n".join(chunk.content for chunk in inference_chunks)
+    filename = _document_download_filename(inference_chunks[0].semantic_identifier)
+
+    return Response(
+        content=document_content,
+        media_type="text/plain",
+        headers={
+            "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"
+        },
     )
 
 

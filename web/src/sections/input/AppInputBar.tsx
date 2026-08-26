@@ -906,6 +906,7 @@ const AppInputBar = React.memo(
                     <div
                       ref={inputRef}
                       id="onyx-chat-input-textbox"
+                      dir="auto"
                       role="textbox"
                       aria-label="Message input"
                       contentEditable={!disabled}

@@ -5,8 +5,8 @@ import re
 import socket
 from enum import Enum, auto
 
-ONYX_DEFAULT_APPLICATION_NAME = "Onyx"
-ONYX_DISCORD_URL = "https://discord.gg/4NA5SbzrWb"
+ONYX_DEFAULT_APPLICATION_NAME = "CST AI Hub"
+ONYX_DISCORD_URL = "https://cst.gov.sa"
 ONYX_UTM_SOURCE = "onyx_app"
 SLACK_USER_TOKEN_PREFIX = "xoxp-"
 ONYX_EMAILABLE_LOGO_MAX_DIM = 512
@@ -59,6 +59,13 @@ INDEX_SEPARATOR = "==="
 
 # For File Connector Metadata override file
 ONYX_METADATA_FILENAME = ".onyx_metadata.json"
+
+# Messages
+DISABLED_GEN_AI_MSG = (
+    "Your System Admin has disabled the Generative AI functionalities of CST Ai Hub.\n"
+    "Please contact them if you wish to have this enabled.\n"
+    "You can still use CST Ai Hub as a search engine."
+)
 
 #####
 # Version Pattern Configs

@@ -112,30 +112,30 @@ function SettingsPopover({
             onClick={onUserSettingsClick}
           />
         </div>,
-        <LineItemButton
-          key="notifications"
-          sizePreset="main-ui"
-          variant="section"
-          rounding={2}
-          icon={SvgBell}
-          title="Notifications"
-          onClick={onOpenNotifications}
-          rightChildren={
-            undismissedCount ? (
-              <SvgNotificationBubble count={undismissedCount} />
-            ) : undefined
-          }
-        />,
-        <LineItemButton
-          key="help-faq"
-          sizePreset="main-ui"
-          variant="section"
-          rounding={2}
-          icon={SvgHelpCircle}
-          title="Help & FAQ"
-          href="https://docs.onyx.app"
-          target="_blank"
-        />,
+        // <LineItemButton
+        //   key="notifications"
+        //   sizePreset="main-ui"
+        //   variant="section"
+        //   rounding={2}
+        //   icon={SvgBell}
+        //   title="Notifications"
+        //   onClick={onOpenNotifications}
+        //   rightChildren={
+        //     undismissedCount ? (
+        //       <SvgNotificationBubble count={undismissedCount} />
+        //     ) : undefined
+        //   }
+        // />,
+        // <LineItemButton
+        //   key="help-faq"
+        //   sizePreset="main-ui"
+        //   variant="section"
+        //   rounding={2}
+        //   icon={SvgHelpCircle}
+        //   title="Help & FAQ"
+        //   href="https://docs.onyx.app"
+        //   target="_blank"
+        // />,
         enterpriseSettings?.custom_help_link_url && (
           <LineItemButton
             key="custom-help-link"
@@ -183,9 +183,9 @@ function SettingsPopover({
             orientation="reverse"
             icon={SvgOnyxLogo}
             title={markdown(
-              `[Onyx ${
+              `[CST AI Hub ${
                 settings.version ?? "dev"
-              }](https://docs.onyx.app/changelog)`
+              }](https://cst.gov.sa)`
             )}
           />
         </div>,
