@@ -31,6 +31,7 @@ from onyx.file_processing.file_types import (
     OnyxMimeTypes,
 )
 from onyx.file_processing.html_utils import parse_html_page_basic
+from onyx.file_processing.pdf_ocr import pdf_ocr_to_markdown
 from onyx.file_processing.pdf_image_utils import iter_pdf_extracted_images
 from onyx.file_processing.unstructured import (
     get_unstructured_api_key,
@@ -227,25 +228,83 @@ def _extract_pdf_text_pdfium(file_bytes: bytes, password: str | None) -> str:
     PDFium releases the GIL while parsing, so a large or complex PDF can't pin
     a worker thread or stall the indexing heartbeat during text extraction.
     """
-    import pypdfium2 as pdfium
+    from pypdf import PdfReader
 
-    pdf = pdfium.PdfDocument(file_bytes, password=password)
     try:
-        page_texts: list[str] = []
-        for page in pdf:
-            # Per-page try/finally so a get_textpage() failure still closes the
-            # native page handle instead of leaking it until GC.
+        start_pos = file.tell()
+    except Exception:
+        start_pos = None
+    try:
+        if start_pos is not None:
+            file.seek(0)
+        reader = PdfReader(file)
+        if reader.is_encrypted:
+            # Try empty password first (owner-password-only PDFs); give up if that fails.
             try:
-                textpage = page.get_textpage()
-                try:
-                    page_texts.append(textpage.get_text_range())
-                finally:
-                    textpage.close()
-            finally:
-                page.close()
-        return TEXT_SECTION_SEPARATOR.join(page_texts)
+                if reader.decrypt("") == 0:
+                    return 0
+            except Exception:
+                return 0
+        count = 0
+        for page in reader.pages:
+            for _ in page.images:
+                count += 1
+                if count > cap:
+                    return count
+        return count
+    except Exception:
+        logger.warning("Failed to count embedded images in PDF", exc_info=True)
+        return 0
     finally:
-        pdf.close()
+        if start_pos is not None:
+            try:
+                file.seek(start_pos)
+            except Exception:
+                pass
+
+
+def _did_pdf_ocr_fail(ocr_text: str) -> bool:
+    stripped_text = ocr_text.strip()
+    return (
+        stripped_text == ""
+        or "[Error processing PDF:" in stripped_text
+        or "[Error processing page " in stripped_text
+    )
+
+
+def _pdf_to_text_with_ocr_fallback(
+    file: IO[Any],
+    file_name: str,
+    pdf_pass: str | None = None,
+) -> str:
+    file.seek(0)
+    ocr_text = pdf_ocr_to_markdown(
+        file,
+        file_name=file_name,
+        include_page_headers=False,
+    )
+    if not _did_pdf_ocr_fail(ocr_text):
+        return ocr_text
+
+    logger.warning(
+        "PDF OCR failed for %s. Falling back to pypdf text extraction.",
+        file_name or "PDF file",
+    )
+    file.seek(0)
+    text, _, _ = read_pdf_file(file, pdf_pass)
+    return text
+
+
+def pdf_to_text(
+    file: IO[Any],
+    pdf_pass: str | None = None,
+    file_name: str = "document.pdf",
+) -> str:
+    """
+    Extract text from a PDF. For embedded images, a more complex approach is needed.
+    This is a minimal approach returning text only.
+    """
+    return _pdf_to_text_with_ocr_fallback(file, file_name, pdf_pass)
 
 
 def read_pdf_file(
@@ -764,7 +823,7 @@ def extract_file_text(
     handle (such as images).
     """
     extension_to_function: dict[str, Callable[[IO[Any]], str]] = {
-        ".pdf": pdf_to_text,
+        ".pdf": lambda f: pdf_to_text(f, file_name=file_name),
         ".docx": lambda f: read_docx_file(f, file_name)[0],  # no images
         ".pptx": lambda f: pptx_to_text(f, file_name),
         ".xlsx": lambda f: xlsx_to_text(f, file_name),
@@ -911,6 +970,8 @@ def _extract_text_and_images(
                 text_content=text_content, embedded_images=images, metadata={}
             )
 
+        # Default to OCR for PDF text extraction, but fall back to the
+        # traditional pypdf text extractor if OCR fails.
         if extension == ".pdf":
             text_content, pdf_metadata, images = read_pdf_file(
                 file,
@@ -918,6 +979,19 @@ def _extract_text_and_images(
                 extract_images=extract_images,
                 image_callback=image_callback,
             )
+            file.seek(0)
+            ocr_text = pdf_ocr_to_markdown(
+                file,
+                file_name=file_name,
+                include_page_headers=False,
+            )
+            if not _did_pdf_ocr_fail(ocr_text):
+                text_content = ocr_text
+            else:
+                logger.warning(
+                    "PDF OCR failed for %s. Falling back to pypdf text extraction.",
+                    file_name or "PDF file",
+                )
             return ExtractionResult(
                 text_content=text_content, embedded_images=images, metadata=pdf_metadata
             )
