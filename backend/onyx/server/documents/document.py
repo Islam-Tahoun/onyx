@@ -1,8 +1,11 @@
+import re
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
 from onyx.auth.permissions import require_permission
-from onyx.auth.users import current_curator_or_admin_user
 from onyx.context.search.models import IndexFilters
 from onyx.context.search.preprocessing.access_filters import (
     build_access_filters_for_user,
@@ -13,6 +16,8 @@ from onyx.db.models import User
 from onyx.db.search_settings import get_current_search_settings
 from onyx.document_index.factory import get_default_document_index
 from onyx.document_index.interfaces_new import DocumentSectionRequest
+from onyx.error_handling.error_codes import OnyxErrorCode
+from onyx.error_handling.exceptions import OnyxError
 from onyx.natural_language_processing.utils import get_tokenizer
 from onyx.prompts.prompt_utils import build_doc_context_str
 from onyx.server.documents.models import ChunkInfo, DocumentInfo
@@ -79,16 +84,16 @@ def get_document_info(
 @router.get("/document-content", dependencies=[Depends(require_vector_db)])
 def download_document_content(
     document_id: str = Query(...),
-    user: User = Depends(current_curator_or_admin_user),
+    user: User = Depends(require_permission(Permission.FULL_ADMIN_PANEL_ACCESS)),
     db_session: Session = Depends(get_session),
 ) -> Response:
-    """Download all indexed content for a document as a plain-text file."""
+    """Download all indexed content for a document as a Markdown file."""
     search_settings = get_current_search_settings(db_session)
     document_index = get_default_document_index(search_settings, None, db_session)
 
     user_acl_filters = build_access_filters_for_user(user, db_session)
     inference_chunks = document_index.id_based_retrieval(
-        chunk_requests=[VespaChunkRequest(document_id=document_id)],
+        chunk_requests=[DocumentSectionRequest(document_id=document_id)],
         filters=IndexFilters(access_control_list=user_acl_filters),
     )
 
@@ -101,7 +106,7 @@ def download_document_content(
 
     return Response(
         content=document_content,
-        media_type="text/plain",
+        media_type="text/markdown",
         headers={
             "Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"
         },

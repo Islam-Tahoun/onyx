@@ -1,28 +1,19 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useSettingsContext } from "@/providers/SettingsProvider";
+import { useSettings } from "@/lib/settings/hooks";
 
 export default function DynamicMetadata() {
-  const { enterpriseSettings } = useSettingsContext();
+  const { enterprise, logoUrl } = useSettings();
 
   useEffect(() => {
-    const title = enterpriseSettings?.application_name || "CST AI Hub";
+    const title = enterprise?.application_name?.trim() || "CST AI Hub";
     if (document.title !== title) {
       document.title = title;
     }
-  }, [enterpriseSettings]);
+  }, [enterprise]);
 
-  // Cache-buster so the favicon re-fetches after an admin uploads a new logo.
-  const cacheBuster = useMemo(
-    () => Date.now(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [enterpriseSettings]
-  );
-
-  const favicon = enterpriseSettings?.use_custom_logo
-    ? `/api/enterprise-settings/logo?v=${cacheBuster}`
-    : "/favicon.ico";
+  const favicon = useMemo(() => logoUrl ?? "/favicon.ico", [logoUrl]);
 
   return <link rel="icon" href={favicon} />;
 }

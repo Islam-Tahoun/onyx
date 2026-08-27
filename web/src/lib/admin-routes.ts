@@ -265,7 +265,7 @@ export const ADMIN_ROUTES = {
     path: "/admin/documents/explorer",
     icon: SvgZoomIn,
     title: "Document Explorer",
-    sidebarLabel: "",
+    sidebarLabel: "Documents Explorer",
     requiredPermission: Permission.FULL_ADMIN_PANEL_ACCESS,
     section: "Documents & Knowledge",
     requiredTier: null,

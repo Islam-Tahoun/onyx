@@ -405,3 +405,11 @@ pre[class*="language-"] {
   height: 8px;
   display: block;
 }
+.opal-sidebar-root__column{
+  background: transparent;
+}
+.opal-sidebar-root__inner{
+  background: var(--background-tint-02);
+  border-radius: var(--radius-16);
+  margin: 0.5rem;
+}

@@ -537,3 +537,13 @@
   background-size: contain;
   background-repeat: no-repeat;
 }
+
+
+body .opal-sidebar-root__column{
+  background: transparent;
+}
+body .opal-sidebar-root__inner{
+  background: var(--background-tint-02);
+  border-radius: var(--radius-16);
+  margin: 0.5rem;
+}

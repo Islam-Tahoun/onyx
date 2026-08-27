@@ -49,9 +49,8 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-      # The shipped image; the Dockerfile's default (last) stage is the dev variant
-      # with debugging tools (published with a -dev tag suffix).
-      target: runtime
+      args:
+        - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
     command: >
       /bin/sh -c "alembic upgrade head &&
       echo \"Starting Onyx Api Server\" &&
@@ -66,8 +65,6 @@ services:
       opensearch:
         condition: service_started
       cache:
-        condition: service_started
-      inference_model_server:
         condition: service_started
       minio:
         condition: service_started
@@ -94,6 +91,21 @@ services:
       # Onyx Craft configuration (disabled by default, set ENABLE_CRAFT=true in .env to enable)
       # Use --include-craft with install script, or manually set in .env file
       - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+      - OUTPUTS_TEMPLATE_PATH=${OUTPUTS_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs}
+      - VENV_TEMPLATE_PATH=${VENV_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/venv}
+      - WEB_TEMPLATE_PATH=${WEB_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs/web}
+      - PERSISTENT_DOCUMENT_STORAGE_PATH=${PERSISTENT_DOCUMENT_STORAGE_PATH:-/app/file-system}
+      - ENABLE_PAID_ENTERPRISE_EDITION_FEATURES=True
+      - LICENSE_ENFORCEMENT_ENABLED=false
+      ## Gen AI Settings
+      - GEN_AI_MAX_TOKENS=128000
+      - LLM_SOCKET_READ_TIMEOUT=5000
+      # MAX_CHUNKS_FED_TO_CHAT=
+      - DISABLE_LITELLM_STREAMING=false
+      - WEB_DOMAIN=http://localhost:3000
+      - APPLICATION_NAME="CST AI Hub"
+      - ONYX_VERSION=${ONYX_VERSION:-0.1.0}
+
     # PRODUCTION: Uncomment the line below to use if IAM_AUTH is true and you are using iam auth for postgres
     # volumes:
     #   - ./bundle.pem:/app/bundle.pem:ro
@@ -131,9 +143,8 @@ services:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-      # The shipped image; the Dockerfile's default (last) stage is the dev variant
-      # with debugging tools (published with a -dev tag suffix).
-      target: runtime
+      args:
+        - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
     command:
       - /bin/sh
       - -euxc
@@ -161,10 +172,6 @@ services:
         condition: service_started
       cache:
         condition: service_started
-      inference_model_server:
-        condition: service_started
-      indexing_model_server:
-        condition: service_started
     restart: unless-stopped
     environment:
       - FILE_STORE_BACKEND=${FILE_STORE_BACKEND:-s3}
@@ -184,6 +191,11 @@ services:
       - API_SERVER_HOST=${API_SERVER_HOST:-api_server}
       # Onyx Craft configuration (set up automatically on container startup)
       - ENABLE_CRAFT=${ENABLE_CRAFT:-false}
+      - OUTPUTS_TEMPLATE_PATH=${OUTPUTS_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs}
+      - VENV_TEMPLATE_PATH=${VENV_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/venv}
+      - WEB_TEMPLATE_PATH=${WEB_TEMPLATE_PATH:-/app/onyx/server/features/build/sandbox/kubernetes/docker/templates/outputs/web}
+      - PERSISTENT_DOCUMENT_STORAGE_PATH=${PERSISTENT_DOCUMENT_STORAGE_PATH:-/app/file-system}
+      - LLM_SOCKET_READ_TIMEOUT=3000
     # PRODUCTION: Uncomment the line below to use if IAM_AUTH is true and you are using iam auth for postgres
     # volumes:
     #   - ./bundle.pem:/app/bundle.pem:ro
@@ -289,94 +301,6 @@ services:
   #   volumes:
   #     - mcp_server_logs:/var/log/onyx
 
-  inference_model_server:
-    image: ${ONYX_MODEL_SERVER_IMAGE:-onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}}
-    build:
-      context: ../../backend
-      dockerfile: Dockerfile.model_server
-    # GPU Support: Uncomment the following lines to enable GPU support
-    # Requires nvidia-container-toolkit to be installed on the host
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-    env_file:
-      - path: .env
-        required: false
-    restart: unless-stopped
-    volumes:
-      # Not necessary, this is just to reduce download time during startup
-      - model_cache_huggingface:/app/.cache/huggingface/
-      # Optional, only for debugging purposes
-      - inference_model_server_logs:/var/log/onyx
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "6"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/health')",
-        ]
-      interval: 20s
-      timeout: 5s
-      retries: 3
-      # Generous start_period to absorb HuggingFace model downloads on first
-      # boot. Healthy is reported as soon as /api/health responds.
-      start_period: 600s
-
-  indexing_model_server:
-    image: ${ONYX_MODEL_SERVER_IMAGE:-onyxdotapp/onyx-model-server:${IMAGE_TAG:-latest}}
-    build:
-      context: ../../backend
-      dockerfile: Dockerfile.model_server
-    # GPU Support: Uncomment the following lines to enable GPU support
-    # Requires nvidia-container-toolkit to be installed on the host
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-    env_file:
-      - path: .env
-        required: false
-    restart: unless-stopped
-    environment:
-      - INDEXING_ONLY=True
-    volumes:
-      # Not necessary, this is just to reduce download time during startup
-      - indexing_huggingface_model_cache:/app/.cache/huggingface/
-      # Optional, only for debugging purposes
-      - indexing_model_server_logs:/var/log/onyx
-    logging:
-      driver: json-file
-      options:
-        max-size: "50m"
-        max-file: "6"
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/health')",
-        ]
-      interval: 20s
-      timeout: 5s
-      retries: 3
-      # Generous start_period to absorb HuggingFace model downloads on first
-      # boot. Healthy is reported as soon as /api/health responds.
-      start_period: 600s
-
   relational_db:
     image: ${BASE_IMAGE_REGISTRY:-docker.io}/library/postgres:15.2-alpine
     shm_size: 1g
@@ -466,7 +390,7 @@ services:
       - NGINX_PROXY_SEND_TIMEOUT=${NGINX_PROXY_SEND_TIMEOUT:-300}
       - NGINX_PROXY_READ_TIMEOUT=${NGINX_PROXY_READ_TIMEOUT:-300}
     ports:
-      - "${HOST_PORT_80:-8800}:80"
+      - "${HOST_PORT_80:-8088}:80"
       - "${HOST_PORT:-3000}:80" # allow for localhost:3000 usage, since that is the norm
     volumes:
       # Mount templates read-only; the startup command copies them into
@@ -590,14 +514,10 @@ volumes:
   db_volume:
   minio_data:
   # Caches to prevent re-downloading models, not strictly necessary
-  model_cache_huggingface:
-  indexing_huggingface_model_cache:
   # Logs preserved across container restarts
   api_server_logs:
   background_logs:
   # mcp_server_logs:
-  inference_model_server_logs:
-  indexing_model_server_logs:
   # Shared volume for persistent document storage (Craft file-system mode)
   file-system:
   # Persistent data for OpenSearch.

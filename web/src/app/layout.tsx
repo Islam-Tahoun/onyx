@@ -1,3 +1,4 @@
+import "@onyx-ai/opal/root.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
@@ -54,11 +55,6 @@ const dmMono = DM_Mono({
     "monospace",
   ],
 });
-
-export const metadata: Metadata = {
-  title: "CST AI Hub",
-  description: "Question answering for your documents",
-};
 
 // force-dynamic prevents Next.js from statically prerendering pages at build
 // time — many child routes use cookies() which requires dynamic rendering.

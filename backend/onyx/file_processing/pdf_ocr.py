@@ -924,7 +924,12 @@ def _ocr_single_pdf_page_from_jpeg_bytes(
         if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
 
-        logger.info("Sending OCR HTTP request for page %d to %s", page_num, endpoint_url)
+        logger.info(
+            "Sending OCR HTTP request for page %d to %s and Model Name: %s",
+            page_num,
+            endpoint_url,
+            model_name,
+        )
         session = _get_http_session()
         response = session.post(
             endpoint_url,
@@ -941,6 +946,7 @@ def _ocr_single_pdf_page_from_jpeg_bytes(
                 ],
                 "max_tokens": max_tokens,
                 "temperature": 0.1,
+                "chat_template_kwargs": {"enable_thinking": False},
             },
             headers=headers,
             timeout=timeout,
@@ -1027,6 +1033,9 @@ async def async_pdf_ocr_to_markdown(
     resolved_model_name = model_name or os.getenv(
         PDF_OCR_VLLM_MODEL_NAME_ENV, DEFAULT_PDF_OCR_MODEL_NAME
     )
+    
+    logger.info("1- OCR Used Model Name %s", resolved_model_name)
+
     resolved_max_tokens = max_tokens or _env_int(
         PDF_OCR_MAX_TOKENS_ENV, DEFAULT_PDF_OCR_MAX_TOKENS
     )
