@@ -55,17 +55,17 @@ export function buildItems(
     items.push(item);
   }
 
-  if (
-    userCanAccess(Permission.FULL_ADMIN_PANEL_ACCESS) &&
-    !flags.hasSubscription
-  ) {
-    items.push({
-      section: "",
-      name: "Upgrade Plan",
-      icon: SvgArrowUpCircle,
-      link: ADMIN_ROUTES.BILLING.path,
-    });
-  }
+  // if (
+  //   userCanAccess(Permission.FULL_ADMIN_PANEL_ACCESS) &&
+  //   !flags.hasSubscription
+  // ) {
+  //   items.push({
+  //     section: "",
+  //     name: "Upgrade Plan",
+  //     icon: SvgArrowUpCircle,
+  //     link: ADMIN_ROUTES.BILLING.path,
+  //   });
+  // }
 
   return items;
 }

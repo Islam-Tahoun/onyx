@@ -149,7 +149,7 @@ SUPER_CLOUD_API_KEY: str | None = os.environ.get("SUPER_CLOUD_API_KEY")
 IMPERSONATION_ENABLED = os.environ.get("IMPERSONATION_ENABLED", "").lower() == "true"
 
 POSTHOG_API_KEY = os.environ.get("POSTHOG_API_KEY")
-POSTHOG_HOST = os.environ.get("POSTHOG_HOST") or "https://us.i.posthog.com"
+POSTHOG_HOST = os.environ.get("POSTHOG_HOST") or "#"
 POSTHOG_DEBUG_LOGS_ENABLED = (
     os.environ.get("POSTHOG_DEBUG_LOGS_ENABLED", "").lower() == "true"
 )
@@ -168,5 +168,6 @@ LICENSE_ENFORCEMENT_ENABLED = (
 # Cloud data plane URL - self-hosted instances call this to reach cloud proxy endpoints
 # Used when MULTI_TENANT=false (self-hosted mode)
 CLOUD_DATA_PLANE_URL = os.environ.get(
-    "CLOUD_DATA_PLANE_URL", "https://cloud.onyx.app/api"
+    # "CLOUD_DATA_PLANE_URL", "https://cloud.onyx.app/api"
+    "CLOUD_DATA_PLANE_URL", "#"
 )

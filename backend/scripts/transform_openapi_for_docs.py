@@ -14,7 +14,8 @@ import json
 from typing import Any
 
 PUBLIC_TAG = "public"
-DOCS_SERVER_URL = "https://cloud.onyx.app/api"
+# DOCS_SERVER_URL = "https://cloud.onyx.app/api"
+DOCS_SERVER_URL = "#"
 INTERNAL_PARAMETERS = {"tenant_id", "db_session"}
 
 
