@@ -2,13 +2,13 @@ import { cn } from "@opal/utils";
 import Text from "@/refresh-components/texts/Text";
 import React, {
   useState,
+  useEffect,
   ReactNode,
   useCallback,
   useMemo,
   memo,
 } from "react";
 import { SvgCheck, SvgCode, SvgCopy } from "@opal/icons";
-import { renderMermaidSVG } from "beautiful-mermaid";
 
 interface CodeBlockProps {
   className?: string;
@@ -38,40 +38,81 @@ function isIncompleteMermaidBlock(input: string) {
   return /^```mermaid\s*$/i.test(trimmed);
 }
 
+function createMermaidRenderId() {
+  if (globalThis.crypto?.randomUUID) {
+    return `mermaid-${globalThis.crypto.randomUUID()}`;
+  }
+
+  return `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 const MermaidRenderer = memo(function MermaidRenderer({
   code,
 }: {
   code: string;
 }) {
   const normalizedCode = useMemo(() => normalizeMermaidCode(code), [code]);
-  const isStreamingFence = useMemo(() => isIncompleteMermaidBlock(code), [code]);
+  const isStreamingFence = useMemo(
+    () => isIncompleteMermaidBlock(code),
+    [code]
+  );
+  const [svg, setSvg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { svg, error } = useMemo(() => {
+  useEffect(() => {
+    let cancelled = false;
+
     if (!normalizedCode || isStreamingFence) {
-      return { svg: null, error: null };
+      setSvg(null);
+      setError(null);
+      return;
     }
 
-    try {
-      const renderedSvg = renderMermaidSVG(normalizedCode, {
-        bg: "var(--background-tint-00)",
-        fg: "var(--text-05)",
-        accent: "var(--action-text-link-05)",
-        muted: "var(--text-03)",
-        border: "var(--border-02)",
-        transparent: true,
-        interactive: true,
-      });
+    setSvg(null);
+    setError(null);
 
-      return { svg: renderedSvg, error: null };
-    } catch (err) {
-      return {
-        svg: null,
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to render Mermaid diagram.",
-      };
+    async function renderDiagram() {
+      try {
+        const { default: mermaid } = await import("mermaid");
+
+        if (cancelled) return;
+
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          theme: "base",
+          flowchart: {
+            htmlLabels: true,
+            useMaxWidth: true,
+          },
+        });
+
+        const result = await mermaid.render(
+          createMermaidRenderId(),
+          normalizedCode
+        );
+
+        if (!cancelled) {
+          setSvg(result.svg);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setSvg(null);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Failed to render Mermaid diagram."
+          );
+        }
+      }
     }
+
+    void renderDiagram();
+
+    return () => {
+      cancelled = true;
+    };
   }, [normalizedCode, isStreamingFence]);
 
   if (error) {
@@ -87,11 +128,12 @@ const MermaidRenderer = memo(function MermaidRenderer({
   return (
     <div
       data-testid="mermaid-diagram"
-      className="w-full min-w-0 overflow-hidden p-2 
-      [&_svg]:h-auto 
-      [&_svg]:max-w-full 
-      [&_svg]:w-full 
-      [&_svg_*]:[font-family:var(--font-hanken-grotesk)]"
+      dir="rtl"
+      className={cn(
+        "w-full min-w-0 overflow-x-auto p-2",
+        "[&_svg]:h-auto [&_svg]:max-w-full [&_svg]:w-full",
+        "[&_svg_*]:[font-family:var(--font-ibm-plex-sans-arabic),Arial,sans-serif]"
+      )}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );

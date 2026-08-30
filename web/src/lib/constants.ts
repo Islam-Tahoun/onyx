@@ -130,6 +130,6 @@ export const DEFAULT_LOGO_SIZE_PX = 24;
 export const DEFAULT_CONTEXT_TOKENS = 120_000;
 export const MAX_CHUNKS_FED_TO_CHAT = 25;
 
-export const APP_SLOGAN = "Open Source AI Platform";
+export const APP_SLOGAN = "AI Enterprise Platform";
 
 export const DEFAULT_PAGE_SIZE = 10;
