@@ -976,7 +976,8 @@ def _extract_text_and_images(
             text_content, pdf_metadata, images = read_pdf_file(
                 file,
                 pdf_pass,
-                extract_images=extract_images,
+                # extract_images=extract_images,
+                extract_images=False,  # We don't extract images from PDFs for now; we only extract text
                 image_callback=image_callback,
             )
             file.seek(0)
