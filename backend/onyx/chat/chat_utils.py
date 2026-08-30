@@ -449,12 +449,14 @@ def _get_or_extract_plaintext(
     file_id: str,
     extract_fn: Callable[[], str],
     store_on_miss: bool = True,
+    extract_on_miss: bool = True,
 ) -> str:
     """Load cached plaintext for a file, or extract and store it.
 
     Tries to read pre-stored plaintext from the file store.  On a miss,
-    calls extract_fn to produce the text, then stores the result so
-    future calls skip the expensive extraction.
+    returns an empty string when extraction is disabled. Otherwise, calls
+    extract_fn to produce the text, then stores the result so future calls
+    skip the expensive extraction.
     """
     file_store = get_default_file_store()
     plaintext_key = plaintext_file_name_for_id(file_id)
@@ -465,6 +467,9 @@ def _get_or_extract_plaintext(
         return plaintext_io.read().decode("utf-8")
     except Exception:
         logger.info("Cache miss for file with id=%s", file_id)
+
+    if not extract_on_miss:
+        return ""
 
     # Cache miss — extract and store.  We cache the result unconditionally
     # (including the empty string) so that files we cannot extract text from
@@ -519,6 +524,9 @@ def load_chat_file(
         UserFileStatus.PROCESSING,
         UserFileStatus.INDEXING,
     )
+    is_pending_pdf = bool(
+        content_pending and filename and filename.lower().endswith(".pdf")
+    )
 
     # Extract text content if it's a text file type (not an image). The
     # cached-plaintext path avoids reading the original bytes on the steady
@@ -541,11 +549,13 @@ def load_chat_file(
         cache_key = user_file_id_str or file_id
 
         try:
-            # While the worker is still processing, don't store the inline
-            # extraction under its key: the worker's canonical plaintext (which
-            # may include image captions) should be what later turns read.
+            # A pending PDF is cache-only because the worker owns its extraction.
+            # Other pending file types keep their existing inline extraction.
             content_text = _get_or_extract_plaintext(
-                cache_key, _extract, store_on_miss=not content_pending
+                cache_key,
+                _extract,
+                store_on_miss=not content_pending,
+                extract_on_miss=not is_pending_pdf,
             )
         except Exception as e:
             logger.warning(

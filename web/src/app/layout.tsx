@@ -13,11 +13,9 @@ import {
   WebVitals,
 } from "@/lib/analytics/shared";
 import Script from "next/script";
-import { DM_Mono, IBM_Plex_Sans_Arabic } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import StatsOverlayLoader from "@/components/dev/StatsOverlayLoader";
-import { cn } from "@opal/utils";
 import AppHealthBanner from "@/sections/banners/HealthBanner";
 import BannerQueue from "@/sections/banners/BannerQueue";
 import { AuthenticationShell } from "@/lib/auth/components";
@@ -25,36 +23,6 @@ import ProductGatingWrapper from "@/providers/ProductGatingWrapper";
 import SWRConfigProvider from "@/providers/SWRConfigProvider";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-
-const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["latin", "arabic"],
-  weight: ["100", "200", "300", "400", "500", "600", "700"],
-  variable: "--font-ibm-plex-sans-arabic",
-  display: "swap",
-  fallback: [
-    "-apple-system",
-    "BlinkMacSystemFont",
-    "Segoe UI",
-    "Roboto",
-    "sans-serif",
-  ],
-});
-
-const dmMono = DM_Mono({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-dm-mono",
-  display: "swap",
-  fallback: [
-    "SF Mono",
-    "Monaco",
-    "Cascadia Code",
-    "Roboto Mono",
-    "Consolas",
-    "Courier New",
-    "monospace",
-  ],
-});
 
 // force-dynamic prevents Next.js from statically prerendering pages at build
 // time — many child routes use cookies() which requires dynamic rendering.
@@ -75,11 +43,7 @@ export default async function Layout({ children }: LayoutProps) {
   const messages = await getMessages();
 
   return (
-    <html
-      lang="en"
-      className={cn(ibmPlexSansArabic.variable, dmMono.variable)}
-      suppressHydrationWarning
-    >
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta
           name="viewport"
