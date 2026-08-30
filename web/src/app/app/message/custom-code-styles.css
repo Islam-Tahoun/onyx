@@ -348,7 +348,7 @@ pre[class*="language-"] {
   transition: opacity 0.15s;
 }
 .markdown-table-card[data-overflows="true"]::after {
-  opacity: 1;
+  /*opacity: 1;*/
 }
 
 /* Sticky first column — inherits the container's background so it
@@ -358,12 +358,12 @@ pre[class*="language-"] {
   position: sticky;
   left: 0;
   z-index: 1;
-  padding-left: 0.75rem;
+  padding-inline-start: 0.75rem;
   background: var(--background-neutral-01);
 }
 .markdown-table-breakout th:last-child,
 .markdown-table-breakout td:last-child {
-  padding-right: 0.75rem;
+  padding-inline-end: 0.75rem;
 }
 
 /* Shadow on sticky column when scrolled. Uses an ::after pseudo-element
